@@ -1,3 +1,7 @@
+/**
+ * @author Fernando Urbina
+ * @description Sales History and Search Page
+ */
 'use client';
 import { useState, useMemo } from 'react';
 import { useSales } from '@/frontend/hooks/useSales';

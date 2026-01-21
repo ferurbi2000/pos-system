@@ -1,3 +1,7 @@
+/**
+ * @author Fernando Urbina
+ * @description Sales Repository with in-memory persistence
+ */
 
 // In-memory store (simulating database)
 if (!globalThis.salesStore) {

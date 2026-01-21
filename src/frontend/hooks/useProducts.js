@@ -1,3 +1,7 @@
+/**
+ * @author Fernando Urbina
+ * @description Custom hook for product state and persistence
+ */
 'use client';
 import { useState, useEffect } from 'react';
 

@@ -1,3 +1,7 @@
+/**
+ * @author Fernando Urbina
+ * @description POS Terminal Component
+ */
 'use client';
 import { useState, useEffect } from 'react';
 import { useProducts } from '@/frontend/hooks/useProducts';

@@ -1,3 +1,7 @@
+/**
+ * @author Fernando Urbina
+ * @description Inventory Management Page
+ */
 'use client';
 import { useState, useMemo } from 'react';
 import { useProducts } from '@/frontend/hooks/useProducts';

@@ -1,3 +1,7 @@
+/**
+ * @author Fernando Urbina
+ * @description Sales Reports Dashboard
+ */
 'use client';
 import { useSales } from '@/frontend/hooks/useSales';
 import {

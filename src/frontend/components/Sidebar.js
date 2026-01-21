@@ -1,3 +1,7 @@
+/**
+ * @author Fernando Urbina
+ * @description Navigation Sidebar Component
+ */
 'use client';
 import Link from 'next/link';
 import { useTheme } from '@/frontend/context/ThemeContext';

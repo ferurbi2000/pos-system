@@ -1,3 +1,7 @@
+/**
+ * @author Fernando Urbina
+ * @description Payment Processing Modal
+ */
 'use client';
 import { useState, useEffect } from 'react';
 

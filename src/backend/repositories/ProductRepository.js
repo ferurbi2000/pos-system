@@ -1,3 +1,7 @@
+/**
+ * @author Fernando Urbina
+ * @description Product Repository with in-memory persistence
+ */
 import { products as initialProducts } from '@/lib/data';
 
 // In-memory store (simulating database) - Persistent in dev

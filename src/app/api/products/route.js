@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { ProductService } from '@/backend/services/ProductService';
 
+/**
+ * @author Fernando Urbina
+ * @description Product API Route
+ */
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
