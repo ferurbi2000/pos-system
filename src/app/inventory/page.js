@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useProducts } from '@/frontend/hooks/useProducts';
 
 export default function InventoryPage() {
@@ -13,6 +13,12 @@ export default function InventoryPage() {
     category: '',
     image: ''
   });
+
+  const availableCategories = useMemo(() => {
+    const defaultCats = ['Bebidas', 'Panadería', 'Postres', 'Comida'];
+    const activeCats = [...new Set(products.map(p => p.category))];
+    return [...new Set([...defaultCats, ...activeCats])].sort();
+  }, [products]);
 
   const handleDelete = async (id) => {
     if (confirm('¿Estás seguro de eliminar este producto?')) {
@@ -44,6 +50,10 @@ export default function InventoryPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.category || formData.category === 'NEW_CAT') {
+      alert("Por favor selecciona o ingresa una categoría válida");
+      return;
+    }
     try {
       if (editingId) {
         await updateProduct(editingId, formData);
@@ -136,81 +146,110 @@ export default function InventoryPage() {
 
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal glass-panel">
-            <h3>{editingId ? 'Editar Producto' : 'Agregar Producto'}</h3>
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>Nombre</label>
-                <input
-                  required
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Categoría</label>
-                <input
-                  required
-                  value={formData.category}
-                  onChange={e => setFormData({ ...formData, category: e.target.value })}
-                  list="categories-list"
-                />
-                <datalist id="categories-list">
-                  <option value="Bebidas" />
-                  <option value="Panadería" />
-                  <option value="Postres" />
-                  <option value="Comida" />
-                </datalist>
-              </div>
+          <div className="modal-content glass-panel">
+            <div className="modal-header">
+              <h2>{editingId ? 'Editar Producto' : 'Nuevo Producto'}</h2>
+              <button className="close-btn" onClick={handleCloseModal}>×</button>
+            </div>
 
-              <div className="form-group">
-                <label>Imagen</label>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>Nombre del Producto</label>
                   <input
-                    value={formData.image}
-                    onChange={e => setFormData({ ...formData, image: e.target.value })}
-                    placeholder="https://..."
-                    style={{ flex: 1 }}
+                    required
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Ej. Café Espresso"
                   />
-                  <label className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
-                    Subir 📁
+                </div>
+
+                <div className="form-group">
+                  <label>Categoría</label>
+                  <select
+                    required
+                    value={formData.category}
+                    onChange={e => setFormData({ ...formData, category: e.target.value })}
+                  >
+                    <option value="">Selecciona una categoría</option>
+                    {availableCategories.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                    {formData.category && !availableCategories.includes(formData.category) && formData.category !== 'NEW_CAT' && (
+                      <option value={formData.category}>{formData.category}</option>
+                    )}
+                    <option value="NEW_CAT">+ Nueva Categoría</option>
+                  </select>
+                  {formData.category === 'NEW_CAT' && (
                     <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      style={{ display: 'none' }}
+                      placeholder="Nombre de la nueva categoría"
+                      style={{ marginTop: '8px' }}
+                      autoFocus
+                      onBlur={(e) => {
+                        if (e.target.value) {
+                          setFormData({ ...formData, category: e.target.value });
+                        } else {
+                          setFormData({ ...formData, category: '' });
+                        }
+                      }}
                     />
-                  </label>
+                  )}
                 </div>
-                {formData.image && (
-                  <div style={{ marginTop: '10px' }}>
-                    <img src={formData.image} alt="Preview" style={{ height: '60px', borderRadius: '4px', objectFit: 'cover' }} />
+
+                <div className="form-group">
+                  <label>Imagen</label>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input
+                      value={formData.image}
+                      onChange={e => setFormData({ ...formData, image: e.target.value })}
+                      placeholder="https://..."
+                      style={{ flex: 1 }}
+                    />
+                    <label className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0, padding: '8px 16px', fontSize: '0.85rem' }}>
+                      Subir 📁
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
                   </div>
-                )}
+                  {formData.image && (
+                    <div style={{ marginTop: '10px' }}>
+                      <img src={formData.image} alt="Preview" style={{ height: '80px', borderRadius: '4px', objectFit: 'cover', border: '1px solid var(--border-color)' }} />
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Precio</label>
+                    <input
+                      type="number" step="0.01" required
+                      value={formData.price}
+                      onChange={e => setFormData({ ...formData, price: e.target.value })}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Stock Inicial</label>
+                    <input
+                      type="number" required
+                      value={formData.stock}
+                      onChange={e => setFormData({ ...formData, stock: e.target.value })}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Precio</label>
-                  <input
-                    type="number" step="0.01" required
-                    value={formData.price}
-                    onChange={e => setFormData({ ...formData, price: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Stock</label>
-                  <input
-                    type="number" required
-                    value={formData.stock}
-                    onChange={e => setFormData({ ...formData, stock: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="modal-actions">
-                <button type="button" className="btn" onClick={handleCloseModal}>Cancelar</button>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                  Cancelar
+                </button>
                 <button type="submit" className="btn btn-primary">
-                  {editingId ? 'Actualizar' : 'Guardar'}
+                  {editingId ? 'Actualizar Producto' : 'Guardar Producto'}
                 </button>
               </div>
             </form>
@@ -327,54 +366,117 @@ export default function InventoryPage() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0,0,0,0.5); 
-          backdrop-filter: blur(4px);
+          background: rgba(0, 0, 0, 0.7);
           display: flex;
           justify-content: center;
           align-items: center;
           z-index: 1000;
+          backdrop-filter: blur(4px);
         }
 
-        .modal {
-          width: 450px;
-          padding: 32px;
+        .modal-content {
+          width: 90%;
+          max-width: 500px;
           background: var(--bg-card);
-          border-radius: var(--radius-lg);
-          box-shadow: var(--shadow-md);
+          border-radius: var(--radius-md);
           border: 1px solid var(--border-color);
+          box-shadow: var(--shadow-xl);
+          display: flex;
+          flex-direction: column;
+          max-height: 90vh;
+          overflow: hidden;
+        }
+
+        .modal-header {
+          padding: 20px;
+          border-bottom: 1px solid var(--border-color);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: var(--bg-secondary);
+        }
+
+        .modal-header h2 { 
+            margin: 0; 
+            font-size: 1.25rem; 
+            color: var(--text-primary);
+        }
+
+        .close-btn { 
+            background: none; 
+            border: none; 
+            font-size: 1.5rem; 
+            cursor: pointer; 
+            color: var(--text-muted); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            transition: background 0.2s;
         }
         
-        .modal h3 {
-            margin-bottom: 24px;
-            font-size: 1.25rem;
+        .close-btn:hover {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: var(--bg-secondary);
         }
 
         .form-group {
-          margin-bottom: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
         }
 
         .form-group label {
-          display: block;
-          margin-bottom: 8px;
           color: var(--text-secondary);
-          font-size: 0.9rem;
-          font-weight: 500;
+          font-size: 0.85rem;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
-        .form-group input {
+        .form-group input, .form-group select {
           width: 100%;
-          padding: 10px 12px;
+          padding: 12px;
           background: var(--bg-primary);
           border: 1px solid var(--border-color);
           border-radius: var(--radius-sm);
           color: var(--text-primary);
           font-size: 0.95rem;
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
         
-        .form-group input:focus {
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E%22);
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: var(--accent-primary);
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .form-row {
@@ -382,11 +484,36 @@ export default function InventoryPage() {
           gap: 20px;
         }
 
-        .modal-actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: 12px;
-          margin-top: 32px;
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
         }
       `}</style>
     </div>

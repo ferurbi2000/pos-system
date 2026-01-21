@@ -6,6 +6,7 @@
   /* Slate 800 */
   --bg-card: #1e293b;
   /* Slate 800 */
+  color-scheme: dark;
 
   --text-primary: #f8fafc;
   /* Slate 50 */
@@ -47,6 +48,7 @@
   /* White */
   --bg-card: #ffffff;
   /* White */
+  color-scheme: light;
 
   --text-primary: #0f172a;
   /* Slate 900 */
